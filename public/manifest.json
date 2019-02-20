@@ -3,9 +3,29 @@
   "name": "Rep Timer",
   "icons": [
     {
+      "src": "/images/muscle-16.png",
+      "type": "image/png",
+      "sizes": "16x16"
+    },
+    {
+      "src": "/images/muscle-32.png",
+      "type": "image/png",
+      "sizes": "32x32"
+    },
+    {
+      "src": "/images/muscle-64.png",
+      "type": "image/png",
+      "sizes": "64x64"
+    },
+    {
+      "src": "/images/muscle-128.png",
+      "type": "image/png",
+      "sizes": "128x128"
+    },
+    {
       "src": "images/muscle.svg",
-      "sizes": "512x512 256x256 128x128 64x64 32x32 24x24 16x16",
-      "type": "image/svg"
+      "type": "image/svg",
+      "sizes": "512x512 256x256 192x192"
     }
   ],
   "start_url": ".",
