@@ -1,8 +1,0 @@
-{
-  "name": "Rep Timer",
-  "short_name": "RepTimer",
-  "start_url": ".",
-  "display": "standalone",
-  "background_color": "#fff",
-  "description": "Rep Timer"
-}
