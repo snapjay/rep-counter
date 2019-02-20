@@ -97,8 +97,8 @@ class StopWatch extends React.Component<{}, State> {
         }
 
         const history = this.state.history.map((item) =>
-            <div className='container' key={item.lap}>
-                <div>{item.lap}</div>
+            <div className='history mb-1' key={item.lap}>
+                <div>#{item.lap}</div>
                 <ProgressBar now={item.time} variant="success" max={this.state.longestTime} striped
                              label={this.renderTime(item.time)}/>
             </div>
@@ -107,12 +107,12 @@ class StopWatch extends React.Component<{}, State> {
         return (
             <div>
                 {actionBtn}
-                <h2>{this.renderTime(this.state.time)}</h2>
+                <h1 className='text-center'>{this.renderTime(this.state.time)}</h1>
 
                 {history}
-                <div className='container mb-3'>
-                    <div> {this.state.lap}</div>
-                    <ProgressBar now={this.state.lapTime} variant="success" max={this.state.longestTime} striped animated
+                <div className='history mb-3'>
+                    <div>#{this.state.lap}</div>
+                    <ProgressBar now={this.state.lapTime} variant="warning" max={this.state.longestTime} striped animated
                                  label={this.renderTime(this.state.lapTime)}/>
                 </div>
                 {lapBtn}

@@ -1,5 +1,8 @@
-$primary:       #123123;
-$progress-height: 2em;
-$progress-font-size:  1rem;
 
+@import "./variables";
 @import "../../node_modules/bootstrap/scss/bootstrap";
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
