@@ -1,19 +1,8 @@
 import React from 'react'
 import {Button, ProgressBar} from 'react-bootstrap'
-
-export interface HistoryItem {
-    lap: number
-    time: number
-}
-
-export interface StopWatchState {
-    running: boolean
-    time: number
-    lap: number
-    lapTime: number
-    longestTime: number
-    history: HistoryItem[]
-}
+import History from './History'
+import {StopWatchState} from "../../types"
+import {calculateLongestTime, renderTime} from "./Utilities"
 
 const initialState: StopWatchState = {
     running: false,
@@ -57,7 +46,7 @@ class StopWatch extends React.Component<{}, State> {
         ))
     }
     private tick = (): void => {
-        const maxTime = this.calculateLongestTime()
+        const maxTime = calculateLongestTime(this.state.history, this.state.lapTime)
         this.setState((state: StopWatchState) => (
             {
                 time: state.time + 1,
@@ -65,24 +54,6 @@ class StopWatch extends React.Component<{}, State> {
                 longestTime: maxTime,
             }
         ))
-    }
-
-    private calculateLongestTime(): number {
-        if (this.state.history.length === 0) {
-            return this.state.lapTime + 1
-        } else {
-            const currentMax = Math.max(...this.state.history.map(a => a.time))
-            if (currentMax < this.state.lapTime) {
-                return this.state.lapTime + 1
-            } else {
-                return currentMax
-            }
-
-        }
-    }
-
-    private renderTime(time: number): string {
-        return (time - (time %= 60)) / 60 + (9 < time ? ':' : ':0') + time
     }
 
     render() {
@@ -96,24 +67,15 @@ class StopWatch extends React.Component<{}, State> {
             actionBtn = <Button size='sm' variant="outline-secondary" onClick={this.start}> Start </Button>
         }
 
-        const history = this.state.history.map((item) =>
-            <div className='history mb-1' key={item.lap}>
-                <div>#{item.lap}</div>
-                <ProgressBar now={item.time} variant="success" max={this.state.longestTime} striped
-                             label={this.renderTime(item.time)}/>
-            </div>
-        )
-
         return (
             <div>
                 {actionBtn}
-                <h1 className='text-center'>{this.renderTime(this.state.time)}</h1>
-
-                {history}
+                <h1 className='text-center'>{renderTime(this.state.time)}</h1>
+                <History historyList={this.state.history} longestTime={this.state.longestTime}></History>
                 <div className='history mb-3'>
                     <div>#{this.state.lap}</div>
                     <ProgressBar now={this.state.lapTime} variant="warning" max={this.state.longestTime} striped animated
-                                 label={this.renderTime(this.state.lapTime)}/>
+                                 label={renderTime(this.state.lapTime)}/>
                 </div>
                 {lapBtn}
             </div>
