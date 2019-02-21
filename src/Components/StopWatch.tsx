@@ -6,6 +6,7 @@ import {calculateLongestTime, renderTime} from "./Utilities"
 
 const initialState: StopWatchState = {
     running: false,
+    timestamp: 0,
     time: 0,
     lap: 1,
     lapTime: 0,
@@ -21,11 +22,8 @@ class StopWatch extends React.Component<{}, State> {
     private timerID: number = 0
 
     protected start = (): void => {
-        this.setState({running: true})
-        this.timerID = window.setInterval(
-            () => this.tick(),
-            1000
-        )
+        this.setState({running: true, timestamp: performance.now()})
+        requestAnimationFrame(this.tick.bind(this))
     }
 
     protected pause = (): void => {
@@ -45,15 +43,26 @@ class StopWatch extends React.Component<{}, State> {
             }
         ))
     }
-    private tick = (): void => {
-        const maxTime = calculateLongestTime(this.state.history, this.state.lapTime)
+
+    private  calculate(timestamp: number) {
+        const time = (timestamp - this.state.timestamp )
+        this.setState({
+            time
+        })
+    }
+
+    private tick = (timestamp: number): void => {
+        if (!this.state.running) return
+        const longestTime = calculateLongestTime(this.state.history, this.state.lapTime)
         this.setState((state: StopWatchState) => (
             {
-                time: state.time + 1,
+                timestamp,
                 lapTime: state.lapTime + 1,
-                longestTime: maxTime,
+                longestTime,
             }
         ))
+
+        requestAnimationFrame(this.tick.bind(this))
     }
 
     render() {
@@ -74,8 +83,9 @@ class StopWatch extends React.Component<{}, State> {
                 <History historyList={this.state.history} longestTime={this.state.longestTime}></History>
                 <div className='history mb-3'>
                     <div>#{this.state.lap}</div>
-                    <ProgressBar now={this.state.lapTime} variant="warning" max={this.state.longestTime} striped animated
+                    <ProgressBar now={parseFloat((this.state.lapTime/ 60).toFixed(0))} variant="warning" max={parseFloat((this.state.longestTime/ 60).toFixed(0))} striped animated={false}
                                  label={renderTime(this.state.lapTime)}/>
+
                 </div>
                 {lapBtn}
             </div>

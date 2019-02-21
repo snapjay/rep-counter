@@ -1,5 +1,6 @@
 export interface StopWatchState {
     running: boolean
+    timestamp: number
     time: number
     lap: number
     lapTime: number
