@@ -2,13 +2,13 @@ import React from 'react'
 import {Button, ProgressBar} from 'react-bootstrap'
 import History from './History'
 import {StopWatchState} from "../../types"
-import {calculateLongestTime, renderTime} from "./Utilities"
+import {calculate, calculateLongestTime, renderInt, renderTime} from "./Utilities"
 
 const initialState: StopWatchState = {
     running: false,
     time: 0,
-    lap: 1,
     lapTime: 0,
+    lap: 1,
     longestTime: 10,
     history: []
 }
@@ -16,26 +16,32 @@ type State = Readonly<typeof initialState>
 
 class StopWatch extends React.Component<{}, State> {
 
+    private timestamp: number = 0
+    private lapstamp: number = 0
+    private interval: number = 0
     readonly state: State = initialState
     private MaxReps: number = 10
-    private timerID: number = 0
 
     protected start = (): void => {
+        if (!this.timestamp) {
+            this.timestamp = performance.now()
+            this.lapstamp = performance.now()
+        }
         this.setState({running: true})
-        this.timerID = window.setInterval(
-            () => this.tick(),
-            1000
-        )
+        this.interval = window.setInterval(this.tick.bind(this), 41)
     }
 
     protected pause = (): void => {
-        clearInterval(this.timerID)
+        clearInterval(this.interval)
+        this.timestamp = 0
+        this.lapstamp = 0
         this.setState({running: false})
     }
 
     protected lap = (): void => {
         const newHistory = this.state.history.slice(0)
         const historyItem = {lap: this.state.lap, time: this.state.lapTime}
+        this.lapstamp = performance.now()
         newHistory.push(historyItem)
         this.setState((state: StopWatchState) => (
             {
@@ -45,13 +51,20 @@ class StopWatch extends React.Component<{}, State> {
             }
         ))
     }
+
     private tick = (): void => {
-        const maxTime = calculateLongestTime(this.state.history, this.state.lapTime)
+        if (!this.state.running) return
+        const currentTime = performance.now()
+        const time = calculate(this.timestamp, currentTime, this.state.time)
+        const lapTime = calculate(this.lapstamp, currentTime,  this.state.lapTime)
+        this.timestamp = currentTime
+        this.lapstamp = currentTime
+        const longestTime = calculateLongestTime(this.state.history, this.state.lapTime)
         this.setState((state: StopWatchState) => (
             {
-                time: state.time + 1,
-                lapTime: state.lapTime + 1,
-                longestTime: maxTime,
+                time,
+                lapTime,
+                longestTime,
             }
         ))
     }
@@ -61,7 +74,7 @@ class StopWatch extends React.Component<{}, State> {
         let lapBtn
 
         if (this.state.running) {
-            actionBtn = <Button size='sm'  variant="outline-secondary" onClick={this.pause}> Pause </Button>
+            actionBtn = <Button size='sm' variant="outline-secondary" onClick={this.pause}> Pause </Button>
             lapBtn = <Button size='lg' onClick={this.lap}>Lap</Button>
         } else {
             actionBtn = <Button size='sm' variant="outline-secondary" onClick={this.start}> Start </Button>
@@ -74,8 +87,13 @@ class StopWatch extends React.Component<{}, State> {
                 <History historyList={this.state.history} longestTime={this.state.longestTime}></History>
                 <div className='history mb-3'>
                     <div>#{this.state.lap}</div>
-                    <ProgressBar now={this.state.lapTime} variant="warning" max={this.state.longestTime} striped animated
-                                 label={renderTime(this.state.lapTime)}/>
+                    <ProgressBar now={renderInt(this.state.lapTime)}
+                                 max={renderInt(this.state.longestTime)}
+                                 label={renderTime(this.state.lapTime)}
+                                 striped
+                                 animated={false}
+                                 variant="info"/>
+
                 </div>
                 {lapBtn}
             </div>

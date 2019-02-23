@@ -1,7 +1,7 @@
 import React from 'react'
 import {ProgressBar} from 'react-bootstrap'
 import {HistoryItem} from "../../types"
-import {renderTime} from "./Utilities"
+import {renderTime, renderInt} from "./Utilities"
 
 type Props = {
     historyList :HistoryItem[]
@@ -14,8 +14,12 @@ class History extends React.Component<Props> {
         const history = this.props.historyList.map((item) =>
             <div className='history mb-1' key={item.lap}>
                 <div>#{item.lap}</div>
-                <ProgressBar now={item.time} variant="success" max={this.props.longestTime} striped
-                             label={renderTime(item.time)}/>
+                <ProgressBar
+                    now={renderInt(item.time)}
+                    max={renderInt(this.props.longestTime )}
+                    label={renderTime(item.time)}
+                    variant="success"
+                    striped />
             </div>
         )
 
