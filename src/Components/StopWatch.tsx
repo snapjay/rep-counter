@@ -3,7 +3,7 @@ import {Button, ProgressBar} from 'react-bootstrap'
 import History from './History'
 import {StopWatchState} from "../../types"
 import {calculate, calculateLongestTime, renderInt, renderTime} from "./Utilities"
-import { Firebase, FirebaseContext } from './Firebase/index';
+import Firebase from "../Services/Firebase"
 
 const initialState: StopWatchState = {
     running: false,
@@ -25,6 +25,7 @@ class StopWatch extends React.Component<{}, State> {
 
     protected start = (): void => {
         if (!this.timestamp) {
+            Firebase.newSet()
             this.timestamp = performance.now()
             this.lapstamp = performance.now()
         }
@@ -51,7 +52,7 @@ class StopWatch extends React.Component<{}, State> {
                 history: newHistory
             }
         ))
-        Firebase.addRep()
+        Firebase.updateSet(newHistory)
     }
 
     private tick = (): void => {
@@ -85,12 +86,6 @@ class StopWatch extends React.Component<{}, State> {
         return (
             <div>
                 {actionBtn}
-                <FirebaseContext.Consumer>
-                    {firebase => {
-                        console.log(firebase)
-                        return <div>I've access to Firebase and render something.</div>;
-                    }}
-                </FirebaseContext.Consumer>
                 <h1 className='text-center'>{renderTime(this.state.time)}</h1>
                 <History historyList={this.state.history} longestTime={this.state.longestTime}></History>
                 <div className='history mb-3'>
