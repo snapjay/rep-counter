@@ -33,24 +33,24 @@ class Firebase {
 
     public onLastedUpdate(callback: (arg1: ILapItem) => void) {
         const getLast: firebase.database.Reference = this.Logs.limitToLast(1).ref
-        getLast.on('value', (snapshot) => {
-            const rsp =  snapshot.val()
-            let val:ILapItem = {meta: {}, results:{}}
+        this.Logs.limitToLast(1).on('value', (snapshot) => {
+            const rsp = snapshot.val()
+            const key = Object.keys(rsp)[0]
+            this.CurrentSet = this.Logs.child(key)
+            let val: ILapItem = {meta: {}, results: {}}
             if (rsp) {
-                const val: ILapItem = rsp[Object.keys(rsp)[0]]
-                console.log(val)
+                 val = rsp[key]
             }
-
             callback(val)
         })
-        this.CurrentSet = getLast
+
     }
 
     public newSet() {
-        const defaultMeta :IRepMeta = {
+        const defaultMeta: IRepMeta = {
             date: firebase.database.ServerValue.TIMESTAMP,
             longestTime: 0,
-            laps: 1,
+            laps: 0,
             totalTime: 0,
         }
         this.CurrentSet = this.getLogsRef().push({meta: defaultMeta})

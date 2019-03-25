@@ -11,7 +11,13 @@ const initialState: StopWatchState = {
     lapTime: 0,
     lap: 1,
     longestTime: 10,
-    history: []
+    history: [],
+    dbRow: {
+        results: {},
+        meta: {
+            totalTime: 0
+        }
+    }
 }
 type State = Readonly<typeof initialState>
 
@@ -25,32 +31,22 @@ class StopWatch extends React.Component<{}, State> {
 
     constructor() {
         super(null)
-
         Firebase.onLastedUpdate((dbRow: ILapItem) => {
-
-            let history:IHistoryItem[] = []
-            if (dbRow.results) {
-                Object.values(dbRow.results).map((item: any) => {
-                    history.push(item)
-                })
-            }
-
             this.setState((state: StopWatchState) => (
                 {
-                    lap: dbRow.meta.laps,
                     time: dbRow.meta.totalTime,
-                    history
+                    dbRow
                 }
             ))
         })
     }
 
-    protected newSet = () => {
+    protected reset = () => {
+        this.setState(initialState)
         Firebase.newSet()
     }
 
     protected start = (): void => {
-
         if (!this.timestamp) {
             this.timestamp = performance.now()
             this.lapstamp = performance.now()
@@ -107,25 +103,25 @@ class StopWatch extends React.Component<{}, State> {
     }
 
     render() {
-        let actionBtn
-        let lapBtn
+        let actionBtn, lapBtn, resetBtn
 
         if (this.state.running) {
             actionBtn = <Button size='sm' variant="outline-secondary" onClick={this.pause}> Pause </Button>
             lapBtn = <Button size='lg' onClick={this.lap}>Lap</Button>
         } else {
             actionBtn = <Button size='sm' variant="outline-secondary" onClick={this.start}> Start </Button>
+            resetBtn = <Button size='sm' variant="outline-warning" className='ml-2' onClick={this.reset}> Reset </Button>
         }
 
         return (
             <div>
                 {actionBtn}
+                {resetBtn}
 
-                <Button size='sm' variant="outline-secondary" onClick={this.newSet}> Reset </Button>
                 <h1 className='text-center'>{renderTime(this.state.time)}</h1>
-                <History historyList={this.state.history} longestTime={this.state.longestTime}></History>
+                <History historyList={this.state.dbRow.results} longestTime={this.state.longestTime}></History>
                 <div className='history mb-3'>
-                    <div>#{this.state.lap}</div>
+                    <div>#{this.state.dbRow.meta.laps + 1}</div>
                     <ProgressBar now={renderInt(this.state.lapTime)}
                                  max={renderInt(this.state.longestTime)}
                                  label={renderTime(this.state.lapTime)}

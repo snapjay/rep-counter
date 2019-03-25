@@ -7,6 +7,7 @@ export interface StopWatchState {
     lap: number
     longestTime: number
     history: IHistoryItem[]
+    dbRow : ILapItem
 }
 
 export interface IHistoryItem {
@@ -16,9 +17,7 @@ export interface IHistoryItem {
 
 export interface ILapItem {
     meta: IRepMeta,
-    results: {
-        [number]: IHistoryItem
-    }
+    results:IResults
 }
 
 export interface IRepMeta {
@@ -26,4 +25,8 @@ export interface IRepMeta {
     longestTime?: number
     laps?: number
     totalTime?: number
+}
+
+export interface IResults  {
+    [list: string]: IHistoryItem
 }
