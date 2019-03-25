@@ -29,10 +29,15 @@ class Firebase {
 
     public newSet() {
         this.CurrentSet = this.getLogsRef().push()
+        this.CurrentSet.child('meta').set({
+            date: firebase.database.ServerValue.TIMESTAMP,
+            fastestTime: 0,
+            totalTime: 0
+        })
     }
 
     public updateSet(history: HistoryItem[]) {
-        this.CurrentSet.set(history)
+        this.CurrentSet.child('results').set(history)
     }
 
     // onStatusUpdate(callback) {
