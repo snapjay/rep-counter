@@ -1,12 +1,12 @@
 import firebase from 'firebase'
-import {HistoryItem} from '../../types'
+import {HistoryItem, IRepMeta, } from '../../types'
 
 class Firebase {
 
     private Database: firebase.database.Database
     private Logs: firebase.database.Reference
 
-    private CurrentSet : firebase.database.Reference
+    private CurrentSet: firebase.database.Reference
 
     constructor() {
         const config = {
@@ -30,9 +30,7 @@ class Firebase {
     public newSet() {
         this.CurrentSet = this.getLogsRef().push()
         this.CurrentSet.child('meta').set({
-            date: firebase.database.ServerValue.TIMESTAMP,
-            fastestTime: 0,
-            totalTime: 0
+            date: firebase.database.ServerValue.TIMESTAMP
         })
     }
 
@@ -40,32 +38,10 @@ class Firebase {
         this.CurrentSet.child('results').set(history)
     }
 
-    // onStatusUpdate(callback) {
-    //     this.Logs.limitToLast(1).orderByChild("type").equalTo(LOG_TYPES.STATUS_CHANGE).on('value', (snapshot) => {
-    //         let rsp = snapshot.val()
-    //         let status = 'UNKNOWN'
-    //         if (rsp) {
-    //             status = rsp[Object.keys(rsp)[0]].value
-    //         }
-    //         callback(status)
-    //     })
-    // }
-    //
-    // onLogUpdate(callback, filter = 'ALL', count = 50) {
-    //     // eslint-disable-next-line
-    //     let resource = this.Logs.limitToLast(count)
-    //     if (filter !== 'ALL') {
-    //         resource = resource.orderByChild("type").equalTo(filter)
-    //     }
-    //     resource = resource.on('value', (snapshot) => {
-    //         let build = []
-    //         let rsp = snapshot.val()
-    //         if (rsp) {
-    //             Object.keys(rsp).map((key, index) => build.unshift(rsp[key]))
-    //         }
-    //         callback(build)
-    //     })
-    // }
+    public updateMeta(meta: IRepMeta) {
+        this.CurrentSet.child('meta').update(meta)
+    }
+
 }
 
 export default new Firebase()
