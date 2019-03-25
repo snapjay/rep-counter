@@ -11,3 +11,10 @@ export interface HistoryItem {
     lap: number
     time: number
 }
+
+
+export interface IRepMeta {
+    longestTime?: number
+    laps?: number
+    totalTime?: number
+}

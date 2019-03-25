@@ -3,6 +3,7 @@ import {Button, ProgressBar} from 'react-bootstrap'
 import History from './History'
 import {StopWatchState} from "../../types"
 import {calculate, calculateLongestTime, renderInt, renderTime} from "./Utilities"
+import Firebase from "../Services/Firebase"
 
 const initialState: StopWatchState = {
     running: false,
@@ -23,6 +24,10 @@ class StopWatch extends React.Component<{}, State> {
     private MaxReps: number = 10
 
     protected start = (): void => {
+        if (this.state.time === 0 ){
+            Firebase.newSet()
+        }
+
         if (!this.timestamp) {
             this.timestamp = performance.now()
             this.lapstamp = performance.now()
@@ -36,6 +41,9 @@ class StopWatch extends React.Component<{}, State> {
         this.timestamp = 0
         this.lapstamp = 0
         this.setState({running: false})
+        Firebase.updateMeta({
+            totalTime: this.state.time
+        })
     }
 
     protected lap = (): void => {
@@ -50,13 +58,19 @@ class StopWatch extends React.Component<{}, State> {
                 history: newHistory
             }
         ))
+        Firebase.updateSet(newHistory)
+        Firebase.updateMeta({
+            longestTime: this.state.longestTime,
+            laps: this.state.lap,
+            totalTime: this.state.time
+        })
     }
 
     private tick = (): void => {
         if (!this.state.running) return
         const currentTime = performance.now()
         const time = calculate(this.timestamp, currentTime, this.state.time)
-        const lapTime = calculate(this.lapstamp, currentTime,  this.state.lapTime)
+        const lapTime = calculate(this.lapstamp, currentTime, this.state.lapTime)
         this.timestamp = currentTime
         this.lapstamp = currentTime
         const longestTime = calculateLongestTime(this.state.history, this.state.lapTime)
