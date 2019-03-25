@@ -1,15 +1,20 @@
 import React, {Component} from 'react'
 import './App.css'
 import StopWatch from './Components/StopWatch'
-import {Container, Row, Col} from 'react-bootstrap'
+import {Container, Row, Col, Navbar} from 'react-bootstrap'
 
 class App extends Component {
     render() {
         return (
-            <Container>
+            <div>
+                <Navbar bg="primary" className='mb-3' variant="dark" expand={true}>
+                    <Navbar.Brand>
+                        {'Rep Timer'}
+                    </Navbar.Brand>
+                </Navbar>
+            <Container  fluid={true}>
                 <Row>
                     <Col>
-                        <h5>Rep Timer</h5>
                         <StopWatch/>
                         <small className='mt-4 d-none'>Icons made by <a
                             href="https://www.flaticon.com/authors/roundicons"
@@ -21,6 +26,7 @@ class App extends Component {
                     </Col>
                 </Row>
             </Container>
+            </div>
         )
     }
 }
