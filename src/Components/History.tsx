@@ -1,10 +1,10 @@
 import React from 'react'
 import {ProgressBar} from 'react-bootstrap'
-import {HistoryItem} from "../../types"
+import {IHistoryItem} from "../../types"
 import {renderTime, renderInt} from "./Utilities"
 
 type Props = {
-    historyList :HistoryItem[]
+    historyList :IHistoryItem[]
     longestTime: number
 }
 

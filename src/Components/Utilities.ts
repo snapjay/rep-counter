@@ -1,4 +1,4 @@
-import {HistoryItem} from "../../types"
+import {IHistoryItem} from "../../types"
 
 export const RESOLUTION: number = 10
 
@@ -19,7 +19,7 @@ export function calculate(timestamp: number, currentTime:number, time: number): 
 }
 
 
-export function calculateLongestTime(history: HistoryItem[], lapTime: number): number {
+export function calculateLongestTime(history: IHistoryItem[], lapTime: number): number {
     if (history.length === 0) {
         return lapTime + 1
     } else {

@@ -1,8 +1,11 @@
 import firebase from 'firebase'
-import {HistoryItem, IRepMeta, } from '../../types'
+import {IHistoryItem, ILapItem, IRepMeta,} from '../../types'
 
 class Firebase {
 
+    readonly LOG_REF = 'logs'
+    readonly META_PATH = 'meta'
+    readonly RESULTS_PATH = 'results'
     private Database: firebase.database.Database
     private Logs: firebase.database.Reference
 
@@ -20,26 +23,45 @@ class Firebase {
 
         firebase.initializeApp(config)
         this.Database = firebase.database()
-        this.Logs = this.Database.ref('logs')
+        this.Logs = this.Database.ref(this.LOG_REF)
     }
 
     protected getLogsRef() {
         return this.Logs
     }
 
-    public newSet() {
-        this.CurrentSet = this.getLogsRef().push()
-        this.CurrentSet.child('meta').set({
-            date: firebase.database.ServerValue.TIMESTAMP
+
+    public onLastedUpdate(callback: (arg1: ILapItem) => void) {
+        const getLast: firebase.database.Reference = this.Logs.limitToLast(1).ref
+        getLast.on('value', (snapshot) => {
+            const rsp =  snapshot.val()
+            let val:ILapItem = {meta: {}, results:{}}
+            if (rsp) {
+                const val: ILapItem = rsp[Object.keys(rsp)[0]]
+                console.log(val)
+            }
+
+            callback(val)
         })
+        this.CurrentSet = getLast
     }
 
-    public updateSet(history: HistoryItem[]) {
-        this.CurrentSet.child('results').set(history)
+    public newSet() {
+        const defaultMeta :IRepMeta = {
+            date: firebase.database.ServerValue.TIMESTAMP,
+            longestTime: 0,
+            laps: 1,
+            totalTime: 0,
+        }
+        this.CurrentSet = this.getLogsRef().push({meta: defaultMeta})
+    }
+
+    public updateSet(history: IHistoryItem[]) {
+        this.CurrentSet.child(this.RESULTS_PATH).set(history)
     }
 
     public updateMeta(meta: IRepMeta) {
-        this.CurrentSet.child('meta').update(meta)
+        this.CurrentSet.child(this.META_PATH).update(meta)
     }
 
 }

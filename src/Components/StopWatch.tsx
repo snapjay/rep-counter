@@ -1,7 +1,7 @@
 import React from 'react'
 import {Button, ProgressBar} from 'react-bootstrap'
 import History from './History'
-import {StopWatchState} from "../../types"
+import {IHistoryItem, ILapItem, StopWatchState} from "../../types"
 import {calculate, calculateLongestTime, renderInt, renderTime} from "./Utilities"
 import Firebase from "../Services/Firebase"
 
@@ -23,10 +23,33 @@ class StopWatch extends React.Component<{}, State> {
     readonly state: State = initialState
     private MaxReps: number = 10
 
+    constructor() {
+        super(null)
+
+        Firebase.onLastedUpdate((dbRow: ILapItem) => {
+
+            let history:IHistoryItem[] = []
+            if (dbRow.results) {
+                Object.values(dbRow.results).map((item: any) => {
+                    history.push(item)
+                })
+            }
+
+            this.setState((state: StopWatchState) => (
+                {
+                    lap: dbRow.meta.laps,
+                    time: dbRow.meta.totalTime,
+                    history
+                }
+            ))
+        })
+    }
+
+    protected newSet = () => {
+        Firebase.newSet()
+    }
+
     protected start = (): void => {
-        if (this.state.time === 0 ){
-            Firebase.newSet()
-        }
 
         if (!this.timestamp) {
             this.timestamp = performance.now()
@@ -97,6 +120,8 @@ class StopWatch extends React.Component<{}, State> {
         return (
             <div>
                 {actionBtn}
+
+                <Button size='sm' variant="outline-secondary" onClick={this.newSet}> Reset </Button>
                 <h1 className='text-center'>{renderTime(this.state.time)}</h1>
                 <History historyList={this.state.history} longestTime={this.state.longestTime}></History>
                 <div className='history mb-3'>
