@@ -1,7 +1,7 @@
 import React from 'react'
 import {Button, ProgressBar} from 'react-bootstrap'
 import History from './History'
-import {IHistoryItem, ILapItem, StopWatchState} from "../../types"
+import {IHistoryItem, ILapItem, IResults, StopWatchState} from "../../types"
 import {calculate, calculateLongestTime, renderInt, renderTime} from "./Utilities"
 import Firebase from "../Services/Firebase"
 
@@ -66,18 +66,16 @@ class StopWatch extends React.Component<{}, State> {
     }
 
     protected lap = (): void => {
-        const newHistory = this.state.history.slice(0)
-        const historyItem = {lap: this.state.lap, time: this.state.lapTime}
+        const newHistory:IResults = Object.assign({[this.state.lap ]: {lap: this.state.lap, time: this.state.lapTime}}, this.state.dbRow.results)
+        const historyItem =
         this.lapstamp = performance.now()
-        newHistory.push(historyItem)
         this.setState((state: StopWatchState) => (
             {
                 lap: state.lap + 1,
                 lapTime: 0,
-                history: newHistory
             }
         ))
-        Firebase.updateSet(newHistory)
+        Firebase.updateResults(newHistory)
         Firebase.updateMeta({
             longestTime: this.state.longestTime,
             laps: this.state.lap,

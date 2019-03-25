@@ -22,7 +22,7 @@ class History extends React.Component<Props> {
 
             const history = Object.keys(list).map((key: string, index) => {
                 return (
-                     <div className='history mb-1'key={list[key].lap}>
+                     <div className='history mb-1' key={list[key].lap}>
                          <div>#{list[key].lap}</div>
                         <ProgressBar
                             now={renderInt(list[key].time)}

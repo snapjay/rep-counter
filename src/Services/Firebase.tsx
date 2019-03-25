@@ -1,5 +1,5 @@
 import firebase from 'firebase'
-import {IHistoryItem, ILapItem, IRepMeta,} from '../../types'
+import {IHistoryItem, ILapItem, IRepMeta, IResults,} from '../../types'
 
 class Firebase {
 
@@ -56,8 +56,8 @@ class Firebase {
         this.CurrentSet = this.getLogsRef().push({meta: defaultMeta})
     }
 
-    public updateSet(history: IHistoryItem[]) {
-        this.CurrentSet.child(this.RESULTS_PATH).set(history)
+    public updateResults(results: IResults) {
+        this.CurrentSet.child(this.RESULTS_PATH).set(results)
     }
 
     public updateMeta(meta: IRepMeta) {
