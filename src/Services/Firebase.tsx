@@ -39,7 +39,7 @@ class Firebase {
             this.CurrentSet = this.Logs.child(key)
             let val: ILapItem = {meta: {}, results: {}}
             if (rsp) {
-                 val = rsp[key]
+                val = rsp[key]
             }
             callback(val)
         })

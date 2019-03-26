@@ -1,17 +1,15 @@
 import React from 'react'
 import {Button, ProgressBar} from 'react-bootstrap'
 import History from './History'
-import {IHistoryItem, ILapItem, IResults, StopWatchState} from "../../types"
-import {calculate, calculateLongestTime, renderInt, renderTime} from "./Utilities"
+import {ILapItem, IResults, StopWatchState} from '../../types'
+import {calculate, calculateLongestTime, renderInt, renderTime} from './Utilities'
 import Firebase from "../Services/Firebase"
 
 const initialState: StopWatchState = {
     running: false,
     time: 0,
     lapTime: 0,
-    lap: 1,
     longestTime: 10,
-    history: [],
     dbRow: {
         results: {},
         meta: {
@@ -66,19 +64,18 @@ class StopWatch extends React.Component<{}, State> {
     }
 
     protected lap = (): void => {
-        const newHistory:IResults = Object.assign({[this.state.lap ]: {lap: this.state.lap, time: this.state.lapTime}}, this.state.dbRow.results)
-        const historyItem =
+        const currentLap = this.state.dbRow.meta.laps
+        const newHistory:IResults = Object.assign({[currentLap ]: {lap: currentLap + 1, time: this.state.lapTime}}, this.state.dbRow.results)
         this.lapstamp = performance.now()
         this.setState((state: StopWatchState) => (
             {
-                lap: state.lap + 1,
                 lapTime: 0,
             }
         ))
         Firebase.updateResults(newHistory)
         Firebase.updateMeta({
             longestTime: this.state.longestTime,
-            laps: this.state.lap,
+            laps: currentLap +1,
             totalTime: this.state.time
         })
     }
@@ -90,7 +87,7 @@ class StopWatch extends React.Component<{}, State> {
         const lapTime = calculate(this.lapstamp, currentTime, this.state.lapTime)
         this.timestamp = currentTime
         this.lapstamp = currentTime
-        const longestTime = calculateLongestTime(this.state.history, this.state.lapTime)
+        const longestTime = calculateLongestTime(this.state.dbRow.results, this.state.lapTime)
         this.setState((state: StopWatchState) => (
             {
                 time,
