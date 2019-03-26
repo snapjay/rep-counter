@@ -1,17 +1,21 @@
 import React from 'react'
 import {Button, ProgressBar} from 'react-bootstrap'
 import History from './History'
-import {StopWatchState} from "../../types"
-import {calculate, calculateLongestTime, renderInt, renderTime} from "./Utilities"
+import {ILapItem, IResults, StopWatchState} from '../../types'
+import {calculate, calculateLongestTime, renderInt, renderTime, dateFormat} from './Utilities'
 import Firebase from "../Services/Firebase"
 
 const initialState: StopWatchState = {
     running: false,
     time: 0,
     lapTime: 0,
-    lap: 1,
     longestTime: 10,
-    history: []
+    dbRow: {
+        results: {},
+        meta: {
+            totalTime: 0
+        }
+    }
 }
 type State = Readonly<typeof initialState>
 
@@ -23,11 +27,24 @@ class StopWatch extends React.Component<{}, State> {
     readonly state: State = initialState
     private MaxReps: number = 10
 
-    protected start = (): void => {
-        if (this.state.time === 0 ){
-            Firebase.newSet()
-        }
+    constructor() {
+        super(null)
+        Firebase.onLastedUpdate((dbRow: ILapItem) => {
+            this.setState((state: StopWatchState) => (
+                {
+                    time: dbRow.meta.totalTime,
+                    dbRow
+                }
+            ))
+        })
+    }
 
+    protected reset = () => {
+        this.setState(initialState)
+        Firebase.newSet()
+    }
+
+    protected start = (): void => {
         if (!this.timestamp) {
             this.timestamp = performance.now()
             this.lapstamp = performance.now()
@@ -47,21 +64,18 @@ class StopWatch extends React.Component<{}, State> {
     }
 
     protected lap = (): void => {
-        const newHistory = this.state.history.slice(0)
-        const historyItem = {lap: this.state.lap, time: this.state.lapTime}
+        const currentLap = this.state.dbRow.meta.laps
+        const newHistory:IResults = Object.assign({[currentLap ]: {lap: currentLap + 1, time: this.state.lapTime}}, this.state.dbRow.results)
         this.lapstamp = performance.now()
-        newHistory.push(historyItem)
         this.setState((state: StopWatchState) => (
             {
-                lap: state.lap + 1,
                 lapTime: 0,
-                history: newHistory
             }
         ))
-        Firebase.updateSet(newHistory)
+        Firebase.updateResults(newHistory)
         Firebase.updateMeta({
             longestTime: this.state.longestTime,
-            laps: this.state.lap,
+            laps: currentLap +1,
             totalTime: this.state.time
         })
     }
@@ -73,7 +87,7 @@ class StopWatch extends React.Component<{}, State> {
         const lapTime = calculate(this.lapstamp, currentTime, this.state.lapTime)
         this.timestamp = currentTime
         this.lapstamp = currentTime
-        const longestTime = calculateLongestTime(this.state.history, this.state.lapTime)
+        const longestTime = calculateLongestTime(this.state.dbRow.results, this.state.lapTime)
         this.setState((state: StopWatchState) => (
             {
                 time,
@@ -84,23 +98,27 @@ class StopWatch extends React.Component<{}, State> {
     }
 
     render() {
-        let actionBtn
-        let lapBtn
+        let actionBtn, lapBtn, resetBtn, date
 
         if (this.state.running) {
             actionBtn = <Button size='sm' variant="outline-secondary" onClick={this.pause}> Pause </Button>
             lapBtn = <Button size='lg' onClick={this.lap}>Lap</Button>
         } else {
             actionBtn = <Button size='sm' variant="outline-secondary" onClick={this.start}> Start </Button>
+            resetBtn = <Button size='sm' variant="outline-warning" className='ml-2' onClick={this.reset}> Reset </Button>
         }
 
         return (
             <div>
+                <small className="float-right">{dateFormat(new Date(this.state.dbRow.meta.date))}</small>
+
                 {actionBtn}
-                <h1 className='text-center'>{renderTime(this.state.time)}</h1>
-                <History historyList={this.state.history} longestTime={this.state.longestTime}></History>
+                {resetBtn}
+
+                <h1 className='text-center text-primary' style={ {fontSize: '60px'}}>{renderTime(this.state.time)}</h1>
+                <History historyList={this.state.dbRow.results} longestTime={this.state.longestTime}></History>
                 <div className='history mb-3'>
-                    <div>#{this.state.lap}</div>
+                    <div>#{this.state.dbRow.meta.laps + 1}</div>
                     <ProgressBar now={renderInt(this.state.lapTime)}
                                  max={renderInt(this.state.longestTime)}
                                  label={renderTime(this.state.lapTime)}

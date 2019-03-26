@@ -1,4 +1,4 @@
-import {HistoryItem} from "../../types"
+import {IHistoryItem, IResults} from "../../types"
 
 export const RESOLUTION: number = 10
 
@@ -19,15 +19,27 @@ export function calculate(timestamp: number, currentTime:number, time: number): 
 }
 
 
-export function calculateLongestTime(history: HistoryItem[], lapTime: number): number {
-    if (history.length === 0) {
+export function calculateLongestTime(history: IResults, lapTime: number): number {
+    if (!history) return 0
+    if (Object.values(history).length === 0) {
         return lapTime + 1
     } else {
-        const currentMax = Math.max(...history.map(a => a.time))
+        const currentMax = Math.max(...Object.values(history).map(a => a.time))
         if (currentMax < lapTime) {
             return lapTime + 1
         } else {
             return currentMax
         }
     }
+}
+
+export function dateFormat(date: Date): string {
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    return  ('0' + date.getDate()).slice(-2) + ' ' +
+        monthNames[(date.getMonth())] + ' - ' +
+        // date.getFullYear() + '/' +
+        ('0' + date.getHours()).slice(-2) + ':' +
+        ('0' + date.getMinutes()).slice(-2) + ':' +
+        ('0' + date.getSeconds()).slice(-2)
+
 }
