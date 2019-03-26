@@ -2,7 +2,7 @@ import React from 'react'
 import {Button, ProgressBar} from 'react-bootstrap'
 import History from './History'
 import {ILapItem, IResults, StopWatchState} from '../../types'
-import {calculate, calculateLongestTime, renderInt, renderTime} from './Utilities'
+import {calculate, calculateLongestTime, renderInt, renderTime, dateFormat} from './Utilities'
 import Firebase from "../Services/Firebase"
 
 const initialState: StopWatchState = {
@@ -98,7 +98,7 @@ class StopWatch extends React.Component<{}, State> {
     }
 
     render() {
-        let actionBtn, lapBtn, resetBtn
+        let actionBtn, lapBtn, resetBtn, date
 
         if (this.state.running) {
             actionBtn = <Button size='sm' variant="outline-secondary" onClick={this.pause}> Pause </Button>
@@ -110,10 +110,12 @@ class StopWatch extends React.Component<{}, State> {
 
         return (
             <div>
+                <small className="float-right">{dateFormat(new Date(this.state.dbRow.meta.date))}</small>
+
                 {actionBtn}
                 {resetBtn}
 
-                <h1 className='text-center'>{renderTime(this.state.time)}</h1>
+                <h1 className='text-center text-primary' style={ {fontSize: '60px'}}>{renderTime(this.state.time)}</h1>
                 <History historyList={this.state.dbRow.results} longestTime={this.state.longestTime}></History>
                 <div className='history mb-3'>
                     <div>#{this.state.dbRow.meta.laps + 1}</div>

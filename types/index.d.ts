@@ -19,7 +19,7 @@ export interface ILapItem {
 }
 
 export interface IRepMeta {
-    date?: Object,
+    date?: Object|number|any,
     longestTime?: number
     laps?: number
     totalTime?: number
